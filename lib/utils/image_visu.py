@@ -17,7 +17,7 @@ def load_matlab_mri_image(path, gray_mode=False):
         im['img'] = 0.2989 * r + 0.5870 * g + 0.1140 * b
     return im['img'], im['img_hdr'][0]
 
-# Load all the MRIs from the same patient
+# Load all the MRIs from the same patient and splits them into a list of images
 def load_patient_mri_images(path, patient_id):
     image_path = osp.join(path, str(patient_id), 'data.mat')
     im, im_header = load_matlab_mri_image(image_path, gray_mode=False)

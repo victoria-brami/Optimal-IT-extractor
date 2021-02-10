@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from lib.exceptions.exceptions_classes import *
 
 # Extract patients IDs looking at folders
 def patient_id_extractor(path):
@@ -27,3 +28,25 @@ def show_my_figure():
 # Close a figure
 def close_my_figure():
     plt.close()
+
+# Create directory (from one or two subfolders)
+def create_new_directory(root_dir, subfolders):
+    """
+
+    :param root_dir: (str) main path
+    :param subfolders: (list of str) list of subfolders names
+    :return: creates nex directory if needed
+    """
+
+    if not os.path.isdir(root_dir):
+        raise PathNotFoundError(root_dir)
+
+    else:
+        if len(subfolders) >= 1 and not os.path.isdir(os.path.join(root_dir, subfolders[0])):
+            os.mkdir(os.path.join(root_dir, subfolders[0]))
+        if len(subfolders) >= 2 and not os.path.isdir(os.path.join(root_dir, subfolders[0], subfolders[1])):
+            os.mkdir(os.path.join(root_dir, subfolders[0], subfolders[1]))
+
+
+
+
