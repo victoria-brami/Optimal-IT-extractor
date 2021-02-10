@@ -1,7 +1,8 @@
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
-# Extract patients IDs
+# Extract patients IDs looking at folders
 def patient_id_extractor(path):
 
     patient_ids = os.listdir(path)
@@ -17,6 +18,12 @@ def sort_my_strings_list(str_list):
         new_name = name.split('_')
         sorted_list.append(int(new_name[-1]))
     sorted_list = np.argsort(sorted_list)
-    print('initial list', str_list)
-    print('sorted', sorted_list)
     return sorted_list
+
+# show a figure
+def show_my_figure():
+    plt.show()
+
+# Close a figure
+def close_my_figure():
+    plt.close()
