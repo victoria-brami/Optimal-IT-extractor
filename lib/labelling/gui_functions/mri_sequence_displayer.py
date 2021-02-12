@@ -82,7 +82,7 @@ class MRISequenceImages(QGridLayout):
         # Button appearance
         button = QPushButton(button_name)
         button.setStyleSheet("border: 1px border-style: outset border-radius: 5px solid #222222;")
-        button.setFixedSize(60, 40)
+        button.setFixedSize(80, 40)
 
         # add button function
         button.key = button_name
@@ -93,7 +93,7 @@ class MRISequenceImages(QGridLayout):
         label = QLabel()
         # self.mri_seq[0] = self.mri_seq[0].scaled(self.image_size, Qt.IgnoreAspectRatio)
         label.setPixmap(self.mri_seq[0])
-        label.setAlignment(Qt.AlignCenter)
+        label.setAlignment(Qt.AlignLeft)
         label.setFixedSize(self.image_size)
         self.displayed_image = label
         self.displayed_image.move(400, 400)
@@ -119,7 +119,7 @@ class MRISequenceImages(QGridLayout):
 
     def _refresh_image(self):
         self.mri_seq[self.displayed_image_index - 1] = self.mri_seq[self.displayed_image_index - 1].scaled(self.image_size, Qt.IgnoreAspectRatio)
-        self.displayed_image.setAlignment(Qt.AlignCenter)
+        self.displayed_image.setAlignment(Qt.AlignLeft)
         self.displayed_image.setFixedSize(self.image_size)
         self.displayed_image.setPixmap(self.mri_seq[self.displayed_image_index - 1])
 
@@ -145,7 +145,7 @@ class TIScoutInformation(QGridLayout):
         :param ti_scout_information: (list) in which the information will be stored
         :param register: (bool) register the lines input in text box
         """
-        super(TIScoutInformation, self).__init__()
+        super().__init__()
         self.patient_name = patient_id
         self.ti_scout_infos = ti_scout_information
         self._set_labels()
