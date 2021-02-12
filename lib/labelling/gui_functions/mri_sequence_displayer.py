@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QSlider, QWidget, QGridLayout, QHBoxLayout, QLineEdit, QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QSlider, QWidget, QGridLayout, QHBoxLayout, QLineEdit, QDesktopWidget, QSizePolicy
 from lib.labelling.gui_functions.main_widget import MainWidget
 from lib.utils.image_visu import load_patient_mri_images
 from lib.utils.misc import patient_id_extractor
 from project_config import *
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import QPixmap, QImage, QFont
+from PyQt5.QtCore import QSize, Qt, QRect
 import cv2
 import numpy as np
 
@@ -21,7 +21,6 @@ def transform_array_to_qpixmap(image):
     """
     height, width = image.shape
     image = np.reshape(image, (height, width, 1))
-    print("Image shape", image.shape)
     bytes_per_line = width * 3
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     qimage = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
@@ -62,27 +61,27 @@ class MRISequenceImages(QGridLayout):
         # build image
         self.displayed_image = self._build_image()
         # build image information
-        image_information = self._build_image_information()
+        self.displayed_image_information = self._build_image_information()
 
-        self.addWidget(self.displayed_image)
-        self.addWidget(image_information)
+        self.addWidget(self.displayed_image, 1, 1)
+        self.addWidget(self.displayed_image_information, 0, 0)
 
         # build buttons and connections
-        self.setSpacing(4)
+        self.setSpacing(1)
         previous_button = self._build_button(LEFT_REPR, self._click_for_image_change)
         previous_button.move(10, 800)
         next_button = self._build_button(RIGHT_REPR, self._click_for_image_change)
-        next_button.move(60, 800)
+        next_button.move(60, 1000)
 
-        self.addWidget(previous_button)
-        self.addWidget(next_button)
+        self.addWidget(previous_button, 3, 0)
+        self.addWidget(next_button, 3, 1)
         # Build informative bar (telling displayed image index)
 
     def _build_button(self, button_name, callback):
 
         # Button appearance
         button = QPushButton(button_name)
-        button.setStyleSheet("border: 1px border-style: outset solid #222222;")
+        button.setStyleSheet("border: 1px border-style: outset border-radius: 5px solid #222222;")
         button.setFixedSize(60, 40)
 
         # add button function
@@ -92,8 +91,9 @@ class MRISequenceImages(QGridLayout):
 
     def _build_image(self):
         label = QLabel()
-        self.mri_seq[0] = self.mri_seq[0].scaled(self.image_size, Qt.IgnoreAspectRatio)
+        # self.mri_seq[0] = self.mri_seq[0].scaled(self.image_size, Qt.IgnoreAspectRatio)
         label.setPixmap(self.mri_seq[0])
+        label.setAlignment(Qt.AlignCenter)
         label.setFixedSize(self.image_size)
         self.displayed_image = label
         self.displayed_image.move(400, 400)
@@ -102,26 +102,32 @@ class MRISequenceImages(QGridLayout):
     def _build_image_information(self):
         label = QLabel(" Image {} / {}".format(self.displayed_image_index, self.nb_images))
         self.displayed_image_information = label
+        self.displayed_image_information.setFont(QFont('Arial', 30))
+        self.displayed_image_information.setAlignment(Qt.AlignLeft)
         return label
 
     def _click_for_image_change(self):
+
         """ Update the index of displayed image """
-        print('Button was clicked')
         if self.sender().key == LEFT_REPR and self.displayed_image_index > 1:
             self.displayed_image_index -= 1
         if self.sender().key == RIGHT_REPR and self.displayed_image_index < self.nb_images:
             self.displayed_image_index += 1
         self._refresh_image()
-        self._refresh_image_information()
+        self._refresh_image_information(self.displayed_image_index)
+        print("image index", self.displayed_image_index)
 
     def _refresh_image(self):
         self.mri_seq[self.displayed_image_index - 1] = self.mri_seq[self.displayed_image_index - 1].scaled(self.image_size, Qt.IgnoreAspectRatio)
+        self.displayed_image.setAlignment(Qt.AlignCenter)
         self.displayed_image.setFixedSize(self.image_size)
         self.displayed_image.setPixmap(self.mri_seq[self.displayed_image_index - 1])
 
-    def _refresh_image_information(self):
+    def _refresh_image_information(self, index):
         self.displayed_image_information = QLabel()
-        self.displayed_image_information.setText(" Image {} / {}".format(self.displayed_image_index, self.nb_images))
+        self.displayed_image_information.setText(" Image {} / {}".format(index, self.nb_images))
+        self.displayed_image_information.setFont(QFont('Arial', 30))
+        self.displayed_image_information.setAlignment(Qt.AlignLeft)
 
 
 
@@ -141,6 +147,7 @@ class TIScoutInformation(QGridLayout):
         """
         super(TIScoutInformation, self).__init__()
         self.patient_name = patient_id
+        self.ti_scout_infos = ti_scout_information
         self._set_labels()
 
 
@@ -149,28 +156,44 @@ class TIScoutInformation(QGridLayout):
         # Patient ID
         self.patient_name_label = QLabel()
         self.patient_name_label.setText("Patient {}".format(self.patient_name))
+        self.patient_name_label.setFont(QFont('Arial', 20))
+        self.patient_name_label.setAlignment(Qt.AlignRight)
 
         # Text explaining what to fill
         self.exp_text_1 = QLabel()
         self.exp_text_1.setText("Write down the indexes corresponding to optimal TIs")
+        self.exp_text_1.setFont(QFont('Arial', 14))
+        self.exp_text_1.setAlignment(Qt.AlignRight)
 
         # QLineEdit
         self.edit_ti_index = QLineEdit()
-        ti_scout_information = str(self.edit_ti_index.text())
+        self.edit_ti_index.setFixedSize(300, 30)
+        self.edit_ti_index.setAlignment(Qt.AlignRight)
 
-        self.addWidget(self.patient_name_label)
-        self.addWidget(self.exp_text_1)
-        self.addWidget(self.edit_ti_index)
+        # Empty Text
+        self.exp_text_2 = QLabel()
+        self.exp_text_2.setAlignment(Qt.AlignRight)
+        self.exp_text_3 = QLabel()
+        self.exp_text_3.setAlignment(Qt.AlignRight)
+
+        self.ti_scout_infos.append(str(self.edit_ti_index.text()))
+        print("Written text", str(self.edit_ti_index.text()))
+
+        self.addWidget(self.patient_name_label, 2 * 0, 1)
+        self.addWidget(self.exp_text_1, 2 * 4, 1)
+        self.addWidget(self.edit_ti_index, 2 * 5, 1)
+        self.addWidget(self.exp_text_2, 2 * 6, 1)
+        self.addWidget(self.exp_text_3, 2 * 7, 1)
 
 
 
 def test_function():
     # load image sequences
     patient_ids = patient_id_extractor(cfg.ROOT)
-    patient_id = patient_ids[20]
+    patient_id = patient_ids[19]
     mri_seq, _, patient_id = load_patient_mri_images(cfg.ROOT, patient_id)
     print("Patient ID", patient_id)
-    ti_info = None
+    ti_info = []
     stop = False
 
     # create the main window in the application
@@ -181,8 +204,9 @@ def test_function():
     # Get window sizes
     screen_size = QDesktopWidget().screenGeometry()
     ration = 3 / 5
-    image_size = QSize(mri_seq[0].shape[1], mri_seq[0].shape[0])
-    image_size = QSize(int(screen_size.width() * ration )- 50, int(screen_size.height() * ration) - 50)
+    inverse_ration = 1
+    image_size = QSize(mri_seq[0].shape[1] * inverse_ration, mri_seq[0].shape[0] * inverse_ration)
+    # image_size = QSize(int(screen_size.width() * ration )- 50, int(screen_size.height() * ration) - 50)
 
     left_panel = MRISequenceImages(mri_seq, patient_id, image_size)
     right_panel = TIScoutInformation(patient_id, ti_info, stop)
@@ -194,7 +218,7 @@ def test_function():
     window.setLayout(layout)
     window.showMaximized()
     app.exec_()
-    return ti_info
+    return right_panel.ti_scout_infos
 
 
 if __name__ == '__main__':
