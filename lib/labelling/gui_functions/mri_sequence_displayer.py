@@ -124,7 +124,7 @@ class MRISequenceImages(QGridLayout):
         self.displayed_image.setPixmap(self.mri_seq[self.displayed_image_index - 1])
 
     def _refresh_image_information(self, index):
-        self.displayed_image_information = QLabel()
+        # self.displayed_image_information = QLabel()
         self.displayed_image_information.setText(" Image {} / {}".format(index, self.nb_images))
         self.displayed_image_information.setFont(QFont('Arial', 30))
         self.displayed_image_information.setAlignment(Qt.AlignLeft)
@@ -167,7 +167,7 @@ class TIScoutInformation(QGridLayout):
 
         # QLineEdit
         self.edit_ti_index = QLineEdit()
-        self.edit_ti_index.setFixedSize(300, 30)
+        self.edit_ti_index.setFixedSize(320, 30)
         self.edit_ti_index.setAlignment(Qt.AlignRight)
 
         # Empty Text
