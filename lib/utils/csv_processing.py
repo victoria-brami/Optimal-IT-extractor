@@ -8,7 +8,7 @@ import os.path as osp
 import pandas as pd
 from project_config import *
 
-def create_csv(filename, destination=None, csv_keys=None):
+def create_csv(filename, destination=None, csv_keys=None, nb_columns=cfg.NB_IMAGES_PER_MRI_SEQUENCE):
     """
     :param filename: (str) name of the csv (needs to have .csv as suffix)
     :param destination: (str) path in which the
@@ -21,7 +21,9 @@ def create_csv(filename, destination=None, csv_keys=None):
         raise PathNotFoundError(destination)
 
     if csv_keys is None:
-        csv_keys = dict(patient_id=[], ti_scout=[])
+        csv_keys = dict(patient_id=[])
+        for image_idx in range(nb_columns):
+            csv_keys['ti_scout_{}'.format(image_idx)] = []
 
     # check destination filename correctness
     csv_path = Path(osp.join(destination, filename))
@@ -51,12 +53,10 @@ def fill_csv(csv_path, optimal_ti_indexes):
 
         contents = dict(patient_id=optimal_ti_indexes[:, 0], ti_scout=optimal_ti_indexes[:, 1:])
         index = pd.MultiIndex.from_tuples(tuple(optimal_ti_indexes))
-        print("Indexes are", index)
-        print("contents", contents)
         columns = ['patient_id']
         for image_idx in range(cfg.NB_IMAGES_PER_MRI_SEQUENCE):
-            columns.append('image_{}'.format(image_idx))
-        data = pd.DataFrame(data=optimal_ti_indexes, columns=columns)
+            columns.append('ti_scout_{}'.format(image_idx))
+        data = pd.DataFrame(data=optimal_ti_indexes[:, :], columns=columns)
 
         # add to csv file
         data.to_csv(csv_file, header=False)
