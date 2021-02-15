@@ -33,7 +33,7 @@ class EditIndex(QLineEdit):
        QTextEdit class.
        """
 
-    def __init__(self, ti_infos):
+    def __init__(self, ti_infos, stop):
         """
         Builds QLineEdit Class
         :param size:
@@ -44,6 +44,7 @@ class EditIndex(QLineEdit):
         # self.setFixedSize(size)
         self.setReadOnly(False)
         self.ti_infos = ti_infos
+        self.stop = stop
 
 
     def keyReleaseEvent(self, event):
@@ -58,6 +59,12 @@ class EditIndex(QLineEdit):
             self.ti_infos = str(self.text())
             self.parentWidget().close()
 
+        # if we would like to stop the selection, we push RIGHT ARROW
+        if event.key() == Qt.Key_Right:
+            self.stop = True
+            print("Stop button was pressed. It has now the value: ", self.stop)
+
+
     def focusOutEvent(self, event):
         """
         Register the information given by the user when it is closed.
@@ -66,6 +73,11 @@ class EditIndex(QLineEdit):
         if self.text() != "":
             self.ti_infos = str(self.text())
             # self.clear()
+
+    def closeEvent(self, event):
+        if self.stop:
+            self.parentWidget().close()
+
 
 
 
@@ -189,11 +201,13 @@ class TIScoutInformation(QGridLayout):
         super().__init__()
         self.patient_name = patient_id
         self.ti_scout_infos = ti_scout_information
-        self._set_labels()
 
         # Condition to stop labelling
         self.can_stop = can_stop
         self.stop = False
+
+        # set the labels
+        self._set_labels()
 
 
     def _set_labels(self):
@@ -211,7 +225,7 @@ class TIScoutInformation(QGridLayout):
         self.exp_text_1.setAlignment(Qt.AlignRight)
 
         # QLineEdit
-        self.edit_ti_index = EditIndex(self.ti_scout_infos)
+        self.edit_ti_index = EditIndex(self.ti_scout_infos, self.stop)
         self.edit_ti_index.setFixedSize(320, 30)
         self.edit_ti_index.setAlignment(Qt.AlignRight)
         self.ti_scout_infos = self.edit_ti_index.ti_infos
@@ -225,13 +239,18 @@ class TIScoutInformation(QGridLayout):
         # self.ti_scout_infos.append(str(self.edit_ti_index.text()))
         # print("Written text", str(self.edit_ti_index.text()))
 
+
         self.addWidget(self.patient_name_label, 2 * 0, 1)
         self.addWidget(self.exp_text_1, 2 * 4, 1)
         self.addWidget(self.edit_ti_index, 2 * 5, 1)
         self.addWidget(self.exp_text_2, 2 * 6, 1)
         self.addWidget(self.exp_text_3, 2 * 7, 1)
 
+        self.stop = self.edit_ti_index.stop
+        print("stop values", self.edit_ti_index.stop, self.stop)
+
     def erase(self):
+        self.stop = self.edit_ti_index.stop
         self.update()
 
 
