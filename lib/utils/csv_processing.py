@@ -6,10 +6,10 @@ from lib.exceptions.exceptions_classes import *
 from pathlib import Path
 import os.path as osp
 import pandas as pd
+from project_config import *
 
 def create_csv(filename, destination=None, csv_keys=None):
     """
-
     :param filename: (str) name of the csv (needs to have .csv as suffix)
     :param destination: (str) path in which the
     :param csv_keys: (dict) contains the keys in CSV file
@@ -20,7 +20,10 @@ def create_csv(filename, destination=None, csv_keys=None):
     if not Path(destination).exists():
         raise PathNotFoundError(destination)
 
-    # destination filename
+    if csv_keys is None:
+        csv_keys = dict(patient_id=[], ti_scout=[])
+
+    # check destination filename correctness
     csv_path = Path(osp.join(destination, filename))
     if csv_path.exists():
         raise AlreadyExistsError(csv_path)
@@ -30,11 +33,52 @@ def create_csv(filename, destination=None, csv_keys=None):
     keys.to_csv(csv_path, index=False)
 
 
-def fill_csv():
-    """ Function to fil a given csv """
+def fill_csv(csv_path, optimal_ti_indexes):
+    """
+    Function to fill a given csv.
+    :param csv_path: (str) path to csv file
+    :return: None
+    """
+    # Check csv existence
+    if not osp.isfile(csv_path):
+        raise PathNotFoundError(csv_path)
+
+    # Check data to add is not empty
+    if len(optimal_ti_indexes) == 0:
+        raise NoDataToAddError(csv_path)
+
+    with open(csv_path, 'a', newline='') as csv_file:
+
+        contents = dict(patient_id=optimal_ti_indexes[:, 0], ti_scout=optimal_ti_indexes[:, 1:])
+        index = pd.MultiIndex.from_tuples(tuple(optimal_ti_indexes))
+        print("Indexes are", index)
+        print("contents", contents)
+        columns = ['patient_id']
+        for image_idx in range(cfg.NB_IMAGES_PER_MRI_SEQUENCE):
+            columns.append('image_{}'.format(image_idx))
+        data = pd.DataFrame(data=optimal_ti_indexes, columns=columns)
+
+        # add to csv file
+        data.to_csv(csv_file, header=False)
+
+
+def get_csv_last_line(csv_path):
+    """ get the last line index and contents """
+
+    # Check csv existence
+    if not osp.isfile(csv_path):
+        raise PathNotFoundError(csv_path)
+
+    data = pd.read_csv(csv_path)
+    if not data.empty:
+        (patient_id, ti_scout) = data.index.values[-1][1], data.index.values[-1][2:]
+    else:
+        (patient_id, ti_scout) = (37, -1)
+
+    return patient_id, ti_scout
 
 
 
 
 if __name__ == '__main__':
-    create_csv(Path('aaa.csv'), Path('../../../../Documents/code_tests'), csv_keys=dict(patient_id=[], ti=[]))
+    create_csv(Path('aaa.csv'), Path('../../../../Documents/code_tests'))
