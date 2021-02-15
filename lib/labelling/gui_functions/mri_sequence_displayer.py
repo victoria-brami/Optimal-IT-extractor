@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QSlider, QWidget, QGridLayout, QHBoxLayout, QLineEdit, QDesktopWidget, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QTextEdit, QSlider, QWidget, QGridLayout, QHBoxLayout, QLineEdit, QDesktopWidget, QSizePolicy
 from lib.labelling.gui_functions.main_widget import MainWidget
 from lib.utils.image_visu import load_patient_mri_images
 from lib.utils.misc import patient_id_extractor
@@ -26,6 +26,48 @@ def transform_array_to_qpixmap(image):
     qimage = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
 
     return QPixmap.fromImage(qimage)
+
+
+class EditIndex(QLineEdit):
+    """
+       QTextEdit class.
+       """
+
+    def __init__(self, ti_infos):
+        """
+        Builds QLineEdit Class
+        :param size:
+        :param ti_infos:
+        """
+        super().__init__()
+        #  self.setTabChangesFocus(True)
+        # self.setFixedSize(size)
+        self.setReadOnly(False)
+        self.ti_infos = ti_infos
+
+
+    def keyReleaseEvent(self, event):
+        """
+        If escape is pressed, the last selected point is erased.
+        If space bar is pressed, the entire widget is closed.
+        """
+        if event.key() == Qt.Key_W:
+            self.parentWidget().erase_point()
+
+        if event.key() == Qt.Key_Escape:
+            self.ti_infos = str(self.text())
+            self.parentWidget().close()
+
+    def focusOutEvent(self, event):
+        """
+        Register the information given by the user when it is closed.
+        """
+        # If something has been written
+        if self.text() != "":
+            self.ti_infos = str(self.text())
+            # self.clear()
+
+
 
 
 ########################################################################################################################
@@ -115,7 +157,6 @@ class MRISequenceImages(QGridLayout):
             self.displayed_image_index += 1
         self._refresh_image()
         self._refresh_image_information(self.displayed_image_index)
-        print("image index", self.displayed_image_index)
 
     def _refresh_image(self):
         self.mri_seq[self.displayed_image_index - 1] = self.mri_seq[self.displayed_image_index - 1].scaled(self.image_size, Qt.IgnoreAspectRatio)
@@ -138,7 +179,7 @@ class MRISequenceImages(QGridLayout):
 
 class TIScoutInformation(QGridLayout):
     
-    def __init__(self, patient_id, ti_scout_information, register):
+    def __init__(self, patient_id, ti_scout_information, can_stop=False):
         """
 
         :param patient_id: (str) patient name
@@ -149,6 +190,10 @@ class TIScoutInformation(QGridLayout):
         self.patient_name = patient_id
         self.ti_scout_infos = ti_scout_information
         self._set_labels()
+
+        # Condition to stop labelling
+        self.can_stop = can_stop
+        self.stop = False
 
 
     def _set_labels(self):
@@ -166,9 +211,10 @@ class TIScoutInformation(QGridLayout):
         self.exp_text_1.setAlignment(Qt.AlignRight)
 
         # QLineEdit
-        self.edit_ti_index = QLineEdit()
+        self.edit_ti_index = EditIndex(self.ti_scout_infos)
         self.edit_ti_index.setFixedSize(320, 30)
         self.edit_ti_index.setAlignment(Qt.AlignRight)
+        self.ti_scout_infos = self.edit_ti_index.ti_infos
 
         # Empty Text
         self.exp_text_2 = QLabel()
@@ -176,8 +222,8 @@ class TIScoutInformation(QGridLayout):
         self.exp_text_3 = QLabel()
         self.exp_text_3.setAlignment(Qt.AlignRight)
 
-        self.ti_scout_infos.append(str(self.edit_ti_index.text()))
-        print("Written text", str(self.edit_ti_index.text()))
+        # self.ti_scout_infos.append(str(self.edit_ti_index.text()))
+        # print("Written text", str(self.edit_ti_index.text()))
 
         self.addWidget(self.patient_name_label, 2 * 0, 1)
         self.addWidget(self.exp_text_1, 2 * 4, 1)
@@ -185,14 +231,15 @@ class TIScoutInformation(QGridLayout):
         self.addWidget(self.exp_text_2, 2 * 6, 1)
         self.addWidget(self.exp_text_3, 2 * 7, 1)
 
+    def erase(self):
+        self.update()
 
 
-def test_function():
+
+
+def labelling_app(patient_id):
     # load image sequences
-    patient_ids = patient_id_extractor(cfg.ROOT)
-    patient_id = patient_ids[19]
     mri_seq, _, patient_id = load_patient_mri_images(cfg.ROOT, patient_id)
-    print("Patient ID", patient_id)
     ti_info = []
     stop = False
 
@@ -218,12 +265,14 @@ def test_function():
     window.setLayout(layout)
     window.showMaximized()
     app.exec_()
-    return right_panel.ti_scout_infos
+    return patient_id, right_panel.edit_ti_index.ti_infos, right_panel.stop
 
 
 if __name__ == '__main__':
-    infos = test_function()
 
-    print('Optimal TIs', infos)
+    patient_ids = patient_id_extractor(cfg.ROOT)
+    patient_id = patient_ids[19]
 
+    infos = labelling_app(patient_id)
+    print("TI Scout Infos", infos)
     print('GREAT, everything is fine !')

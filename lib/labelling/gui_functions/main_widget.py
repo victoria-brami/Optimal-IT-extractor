@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 
 class MainWidget(QWidget):
 
-    def __init__(self, index_close=1):
+    def __init__(self, index_close=2):
         super().__init__()
         self.setFocusPolicy(True)
         self.setFixedSize(800, 400)
@@ -24,4 +24,7 @@ class MainWidget(QWidget):
         """
         children = self.children()
         children[self.index_close].close()
+
+    def erase(self):
+        self.children()[1].erase()
 
