@@ -14,4 +14,5 @@ class Config:
     LABELS_CSV_PATH = osp.join(PATH_TO_PROJECT, 'data', 'labels.csv')
 
 
+# Useful in almost all python files
 cfg = Config()
