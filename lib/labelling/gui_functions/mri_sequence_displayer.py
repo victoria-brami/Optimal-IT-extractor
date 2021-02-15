@@ -113,12 +113,12 @@ class MRISequenceImages(QGridLayout):
         """
         super(MRISequenceImages, self).__init__()
         self.nb_images = len(mri_seq)
-        # self.mri_seq = [transform_array_to_qpixmap(mri_seq[i]) for i in range(self.nb_images)]
-        print("MRI Seq", type(mri_seq[0]))
-        images_paths = [osp.join(cfg.PATH_TO_PROJECT, 'data', 'TIScoutBlackBlood_split', patient_id, mri_seq[i][0].split(' ')[-1] + '.png') for i in range(self.nb_images)]
+       
+        self.images_paths = [osp.join(cfg.PATH_TO_PROJECT, 'data', 'TIScoutBlackBlood_split', patient_id, mri_seq[i][0].split(' ')[-1] + '.png') for i in range(self.nb_images)]
+        self.brightness_value_now = 0
 
         # self.mri_seq = [transform_array_to_qpixmap(mri_seq[i]) for i in range(self.nb_images)]
-        self.mri_seq = [transform_array_to_qpixmap(images_paths[i]) for i in range(self.nb_images)]
+        self.mri_seq = [transform_array_to_qpixmap(self.images_paths[i]) for i in range(self.nb_images)]
 
         self.patient_id = patient_id
         self.image_size = image_size
@@ -135,6 +135,8 @@ class MRISequenceImages(QGridLayout):
     def initUI(self):
 
         # build slidebar
+        self.verticalSlider = self._build_vertical_contrast_slider()
+        self.addWidget(self.verticalSlider, 1, 0)
 
         # build image
         self.displayed_image = self._build_image()
@@ -151,8 +153,8 @@ class MRISequenceImages(QGridLayout):
         next_button = self._build_button(RIGHT_REPR, self._click_for_image_change)
         next_button.move(60, 1000)
 
-        self.addWidget(previous_button, 3, 0)
-        self.addWidget(next_button, 3, 1)
+        self.addWidget(previous_button, 3, 1)
+        self.addWidget(next_button, 3, 2)
         # Build informative bar (telling displayed image index)
 
     def _build_button(self, button_name, callback):
@@ -167,9 +169,14 @@ class MRISequenceImages(QGridLayout):
         button.clicked.connect(callback)
         return button
 
+    def _build_vertical_contrast_slider(self):
+        slider = QSlider()
+        slider.setOrientation(Qt.Vertical)
+        slider.valueChanged['int'].connect(self.brightness_value)  # in order to adapt the contrast
+        return slider
+
     def _build_image(self):
         label = QLabel()
-        # self.mri_seq[0] = self.mri_seq[0].scaled(self.image_size, Qt.IgnoreAspectRatio)
         label.setPixmap(self.mri_seq[0])
         label.setAlignment(Qt.AlignLeft)
         label.setFixedSize(self.image_size)
@@ -191,10 +198,20 @@ class MRISequenceImages(QGridLayout):
             self.displayed_image_index -= 1
         if self.sender().key == RIGHT_REPR and self.displayed_image_index < self.nb_images:
             self.displayed_image_index += 1
-        self._refresh_image()
+        self._refresh_image(self.brightness_value_now)
         self._refresh_image_information(self.displayed_image_index)
 
-    def _refresh_image(self):
+    def _refresh_image(self, contrast_value):
+        self.mri_seq[self.displayed_image_index - 1] = cv2.imread(self.images_paths[self.displayed_image_index - 1])
+        self.mri_seq[self.displayed_image_index - 1] = cv2.cvtColor(self.mri_seq[self.displayed_image_index - 1], cv2.COLOR_BGR2GRAY)
+        lim = 255 - contrast_value
+        self.mri_seq[self.displayed_image_index - 1][self.mri_seq[self.displayed_image_index - 1] > lim] = 255
+        self.mri_seq[self.displayed_image_index - 1][self.mri_seq[self.displayed_image_index - 1] <= lim] += contrast_value
+        # self.mri_seq[self.displayed_image_index - 1] = cv2.cvtColor(self.mri_seq[self.displayed_image_index - 1], cv2.COLOR_BGR2GRAY)
+        self.mri_seq[self.displayed_image_index - 1] = QImage(self.mri_seq[self.displayed_image_index - 1], self.image_size.width(), self.image_size.height(), QImage.Format_Grayscale8)
+        self.mri_seq[self.displayed_image_index - 1] = QPixmap.fromImage(self.mri_seq[self.displayed_image_index - 1])
+
+
         self.mri_seq[self.displayed_image_index - 1] = self.mri_seq[self.displayed_image_index - 1].scaled(self.image_size, Qt.IgnoreAspectRatio)
         self.displayed_image.setAlignment(Qt.AlignLeft)
         self.displayed_image.setFixedSize(self.image_size)
@@ -205,6 +222,11 @@ class MRISequenceImages(QGridLayout):
         self.displayed_image_information.setText(" Image {} / {}".format(index, self.nb_images))
         self.displayed_image_information.setFont(QFont('Arial', 30))
         self.displayed_image_information.setAlignment(Qt.AlignLeft)
+
+    def brightness_value(self, contrast_value):
+        self.brightness_value_now = contrast_value
+        self._refresh_image(contrast_value)
+
 
 
 
