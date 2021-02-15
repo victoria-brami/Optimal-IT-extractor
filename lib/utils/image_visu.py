@@ -28,6 +28,16 @@ def load_patient_mri_images(path, patient_id):
         headers.append(im_header[image_idx])
     return images, headers, patient_id
 
+def load_patient_mri_images_bis(path, patient_id):
+    image_path = osp.join(path, str(patient_id), 'data.mat')
+    im, im_header = load_matlab_mri_image(image_path, gray_mode=False)
+    images = []
+    headers = []
+    for image_idx in range(NB_IMAGES):
+        images.append(im[:, :, image_idx])
+        headers.append(im_header[image_idx])
+    return images, headers, patient_id
+
 # Display the image (color mode or not)
 def display_image(im):
     cv2.imshow('image', im)

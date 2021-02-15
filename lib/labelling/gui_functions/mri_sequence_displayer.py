@@ -13,19 +13,37 @@ RIGHT_REPR = ">"
 LEFT_REPR = "<"
 
 # Transform an array to qpixmap
+"""
 def transform_array_to_qpixmap(image):
-    """
-    Convertion to QPixmap type
-    :param image: (array) array image
-    :return: (QImage) converted image
-    """
+
     height, width = image.shape
-    image = np.reshape(image, (height, width, 1))
+    image = np.reshape(image, (height, width, 1)).astype(np.int32)
     bytes_per_line = width * 3
-    image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-    qimage = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+    bytes_per_line = width * 6
+    # image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    # cv2.imshow('img', image)
+
+    qimage = QImage(image, width, height, bytes_per_line, QImage.Format_Grayscale8)
+    # qimage = QImage(image.data)
 
     return QPixmap.fromImage(qimage)
+"""
+
+def transform_array_to_qpixmap(image_path):
+    print('path of the image', image_path)
+    image = cv2.imread(image_path)
+    height, width, _ = image.shape
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    qimage = QImage(image, width, height, QImage.Format_Grayscale8)
+
+    return QPixmap.fromImage(qimage)
+
+def display(image_path):
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('img', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 class EditIndex(QLineEdit):
@@ -95,7 +113,13 @@ class MRISequenceImages(QGridLayout):
         """
         super(MRISequenceImages, self).__init__()
         self.nb_images = len(mri_seq)
-        self.mri_seq = [transform_array_to_qpixmap(mri_seq[i]) for i in range(self.nb_images)]
+        # self.mri_seq = [transform_array_to_qpixmap(mri_seq[i]) for i in range(self.nb_images)]
+        print("MRI Seq", type(mri_seq[0]))
+        images_paths = [osp.join(cfg.PATH_TO_PROJECT, 'data', 'TIScoutBlackBlood_split', patient_id, mri_seq[i][0].split(' ')[-1] + '.png') for i in range(self.nb_images)]
+
+        # self.mri_seq = [transform_array_to_qpixmap(mri_seq[i]) for i in range(self.nb_images)]
+        self.mri_seq = [transform_array_to_qpixmap(images_paths[i]) for i in range(self.nb_images)]
+
         self.patient_id = patient_id
         self.image_size = image_size
 
@@ -258,7 +282,8 @@ class TIScoutInformation(QGridLayout):
 
 def labelling_app(patient_id):
     # load image sequences
-    mri_seq, _, patient_id = load_patient_mri_images(cfg.ROOT, patient_id)
+    mri_im, mri_seq, patient_id = load_patient_mri_images(cfg.ROOT, patient_id)
+    print('Types of different sequences', type(mri_im[0]), mri_seq[0])
     ti_info = []
     stop = False
 
@@ -271,7 +296,7 @@ def labelling_app(patient_id):
     screen_size = QDesktopWidget().screenGeometry()
     ration = 3 / 5
     inverse_ration = 1
-    image_size = QSize(mri_seq[0].shape[1] * inverse_ration, mri_seq[0].shape[0] * inverse_ration)
+    image_size = QSize(mri_im[0].shape[1] * inverse_ration, mri_im[0].shape[0] * inverse_ration)
     # image_size = QSize(int(screen_size.width() * ration )- 50, int(screen_size.height() * ration) - 50)
 
     left_panel = MRISequenceImages(mri_seq, patient_id, image_size)
@@ -292,6 +317,10 @@ if __name__ == '__main__':
     patient_ids = patient_id_extractor(cfg.ROOT)
     patient_id = patient_ids[19]
 
+    # images, _, _ = load_patient_mri_images(cfg.ROOT, patient_id)
+    # display(osp.join(cfg.PATH_TO_PROJECT, 'data', 'TIScoutBlackBlood_split', patient_id, '60ms.png'))
+    #display(images[4])
+
     infos = labelling_app(patient_id)
-    print("TI Scout Infos", infos)
+    # print("TI Scout Infos", infos)
     print('GREAT, everything is fine !')
