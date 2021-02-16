@@ -1,23 +1,23 @@
 from PyQt5.QtWidgets import QMessageBox, QApplication
 
 
-
 def display_label_selection_instructions():
     """
     Explains to the user how to label the images.
     :return: None
     """
-    INSTRUCTIONS_OPTIMAL_TI_SELECTION = ' YOU WILL NOW BE ABLE TO LABEL THE IMAGES YOU SEE DEPENDING ON THEIR CONTRAST \n \n'
-    INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' SOME WARNINGS \n'
-    INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' For a given sequence, write on the side the images index candidates for optimal TI.'
-    INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' For a given sequence, write on the side the images index candidates for optimal TI.'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION = ' YOU WILL NOW BE ABLE TO LABEL THE IMAGES YOU SEE DEPENDING ON THEIR CONTRAST \n \n \n'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' SOME WARNINGS \n \n'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += '  For a given sequence, write on the side the images index candidates for optimal TI.\n '
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += '  Ex: if the images 4, 5, and 6 are optimal, write down "4 5 6" \n \n'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += '  If the CSV file is open, please close it before !! \n \n'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += '  Press ESCAPE button when you finished labelling the sequence \n'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += '  If you want to STOP labelling, press ESCAPE button without filling the box \n'
     app = QApplication([])
     message = QMessageBox()
     message.setText(INSTRUCTIONS_OPTIMAL_TI_SELECTION)
     message.show()
     app.exec_()
-
-
 
 
 def display_annoted_label_informations(csv_path=None):

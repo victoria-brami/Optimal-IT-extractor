@@ -1,5 +1,4 @@
 from lib.labelling.gui_functions.labelling_instructions import *
-from lib.labelling.gui_functions.labelling_window import *
 from lib.utils.csv_processing import *
 from lib.labelling.gui_functions.mri_sequence_displayer import labelling_app
 from lib.utils.image_visu import load_patient_mri_images
@@ -35,9 +34,12 @@ def optimal_ti_selection(root_dir, patient_ids):
         # Plot the images of the sequence and write down the optimal image indexes (where we display the window)
         (patient_id, optimal_indexes, stop) = labelling_app(patient_ids[sequence_index])
 
+        # Gather the data in a vector (form of the vector: [patient_id, 0, ..., 1, 1, 0, ...0])
+        sequence_label_vector = [0] * (cfg.NB_IMAGES_PER_MRI_SEQUENCE + 1)
+
         # If the user wants to stop the selection, he does not fill the Edit line
         if len(optimal_indexes) == 0:
-            stop_labelling = False
+            stop_labelling = True
 
         else:
             optimal_indexes = optimal_indexes.split(" ")
@@ -46,8 +48,6 @@ def optimal_ti_selection(root_dir, patient_ids):
             if "" in optimal_indexes:
                 optimal_indexes.remove('')
 
-            # Gather the data in a vector (form of the vector: [patient_id, 0, ..., 1, 1, 0, ...0])
-            sequence_label_vector = [0] * (cfg.NB_IMAGES_PER_MRI_SEQUENCE + 1)
             sequence_label_vector[0] = int(patient_id)
 
             print('PATIENT {} optimal indexes: {}'.format(patient_id, optimal_indexes))

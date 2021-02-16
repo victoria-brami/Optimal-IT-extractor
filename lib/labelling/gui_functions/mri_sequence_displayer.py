@@ -56,6 +56,7 @@ class EditIndex(QLineEdit):
         #  self.setTabChangesFocus(True)
         # self.setFixedSize(size)
         self.setReadOnly(False)
+        self.setPlaceholderText('example: 4 5 6')
         self.ti_infos = ti_infos
         self.stop = stop
 
