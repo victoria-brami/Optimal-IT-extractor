@@ -15,10 +15,9 @@ patient_index = 1;
 
 for patient_name = patient_ids
     % Load and diplay sequences
-    namefile = fullfile(ROOT, 'Optimal-IT-Extractor', 'data', 'TIScoutBlackBlood', 
-                        patient_name{1}, 'data.mat');
+    namefile = fullfile(ROOT, 'Optimal-IT-Extractor', 'data', 'TIScoutBlackBlood', patient_name{1}, 'data.mat');
     load(namefile);
-    imagine(img);
+    imagine_bis(img);
     
     % message box for data annotations
     prompt = {'Enter space-separated optimal indexes (varying from 1 to 11):'};

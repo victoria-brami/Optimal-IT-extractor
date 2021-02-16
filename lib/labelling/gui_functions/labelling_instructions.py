@@ -10,6 +10,7 @@ def display_label_selection_instructions():
     INSTRUCTIONS_OPTIMAL_TI_SELECTION = ' YOU WILL NOW BE ABLE TO LABEL THE IMAGES YOU SEE DEPENDING ON THEIR CONTRAST \n \n'
     INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' SOME WARNINGS \n'
     INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' For a given sequence, write on the side the images index candidates for optimal TI.'
+    INSTRUCTIONS_OPTIMAL_TI_SELECTION += ' For a given sequence, write on the side the images index candidates for optimal TI.'
     app = QApplication([])
     message = QMessageBox()
     message.setText(INSTRUCTIONS_OPTIMAL_TI_SELECTION)

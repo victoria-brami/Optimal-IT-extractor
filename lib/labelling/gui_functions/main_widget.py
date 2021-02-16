@@ -6,7 +6,7 @@ class MainWidget(QWidget):
     def __init__(self, index_close=2):
         super().__init__()
         self.setFocusPolicy(True)
-        self.setFixedSize(800, 400)
+        self.setFixedSize(850, 400)
         # The index of the child that is the image selection widget
         self.index_close = index_close
 

@@ -34,7 +34,6 @@ def optimal_ti_selection(root_dir, patient_ids):
 
         # Plot the images of the sequence and write down the optimal image indexes (where we display the window)
         (patient_id, optimal_indexes, stop) = labelling_app(patient_ids[sequence_index])
-        print('optimal indexes', optimal_indexes)
 
         # If the user wants to stop the selection, he does not fill the Edit line
         if len(optimal_indexes) == 0:
@@ -67,6 +66,7 @@ def optimal_ti_selection(root_dir, patient_ids):
 
 
 def label_and_save_optimal_tis(csv_path):
+
     """
     This is the main function.
     It will check all the patient mris sequence and enable the user to annotate them until he has had enough of it.
@@ -74,12 +74,10 @@ def label_and_save_optimal_tis(csv_path):
     :param csv_path: (str) path to the csv in which the labels will be stored
     :return: None
     """
+
     # Find patient Ids
     patient_ids = patient_id_extractor(cfg.ROOT)
     last_patient_name = patient_ids[0]
-
-    # Display the information linked to annotations
-    display_annoted_label_informations(csv_path)
 
     # Check file, directory existence, otherwise return an error or build the directory
 
@@ -91,19 +89,21 @@ def label_and_save_optimal_tis(csv_path):
     # Otherwise retrieve the last line of csv to start with the right patient
     last_patient_index = patient_ids[0]
 
-    last_patient_index, _ = get_csv_last_line(csv_path)
-    last_patient_index = patient_ids.index(str(last_patient_index))
+    last_patient_index, last_patient_name, _ = get_csv_last_line(csv_path)
+    # last_patient_index = patient_ids.index(str(last_patient_index))
 
-    print("Last patient index is", last_patient_index)
 
     # Process to the labelling
     print('LABELLING TI SCOUT MRIs SEQUENCES ...')
     list_optimal_ti_scouts = optimal_ti_selection(cfg.ROOT, patient_ids[last_patient_index + 1: last_patient_index+5])
-    print("list_optimal_ti_scouts", list_optimal_ti_scouts)
+
     nb_annoted_sequences = len(list_optimal_ti_scouts)
 
     # Save the annotations in csv
     fill_csv(csv_path, list_optimal_ti_scouts)
+
+    # Display the information linked to annotations
+    display_annoted_label_informations(csv_path)
 
     return list_optimal_ti_scouts
 

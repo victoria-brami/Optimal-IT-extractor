@@ -71,11 +71,12 @@ def get_csv_last_line(csv_path):
 
     data = pd.read_csv(csv_path)
     if not data.empty:
-        (patient_id, ti_scout) = data.index.values[-1][1], data.index.values[-1][2:]
+        data_contents = data.tail(1)
+        (last_index, patient_id, ti_scout) = len(data), data_contents.index.to_numpy()[0], data_contents.to_numpy()[0]
     else:
-        (patient_id, ti_scout) = (37, -1)
+        (last_index, patient_id, ti_scout) = (-1, 37, -1)
 
-    return patient_id, ti_scout
+    return last_index, patient_id, ti_scout
 
 
 
