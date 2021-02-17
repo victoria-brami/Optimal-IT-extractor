@@ -5,14 +5,16 @@ from lib.utils.image_visu import load_patient_mri_images
 from lib.utils.misc import patient_id_extractor
 from project_config import *
 import numpy as np
+import argparse
+
 
 def optimal_ti_selection(root_dir, patient_ids):
     """
     This function enables for each mri sequence to write down the
     images indexes corresponding to the best images rendering
 
-    :param mri_sequence_paths: (list) list of patient names (string numbers)
-    :param root_dir: root path
+    :param root_dir: (strings) root path to data folder
+    :param patient_ids: (list of strings) list of patients names (folder numbers)
     :return: (array) labelled data for each patient (1 if the image in the sequence is optimal, 0 otherwise)
     """
     # Number of sequences to label
@@ -50,10 +52,17 @@ def optimal_ti_selection(root_dir, patient_ids):
 
             sequence_label_vector[0] = int(patient_id)
 
-            print('PATIENT {} optimal indexes: {}'.format(patient_id, optimal_indexes))
+            # in case the user wrote down an invalid parameter: the application closes
+            possible_indexes = [str(j) for j in range(cfg.NB_IMAGES_PER_MRI_SEQUENCE)]
 
             for idx in optimal_indexes:
-                sequence_label_vector[int(idx)] = 1
+                if idx not in possible_indexes:
+                    stop_labelling = True
+                else:
+                    sequence_label_vector[int(idx)] = 1
+
+            if stop_labelling:
+                display_annotations_error()
 
         # Save the data while the user wants to continue labelling
         if not stop_labelling:
@@ -65,39 +74,32 @@ def optimal_ti_selection(root_dir, patient_ids):
     return np.array(list_optimal_tis)
 
 
-def label_and_save_optimal_tis(csv_path):
-
+def label_and_save_optimal_tis(csv_path, nb_to_label=None):
     """
     This is the main function.
     It will check all the patient mris sequence and enable the user to annotate them until he has had enough of it.
-    :param patient_ids: (list of strings) patient names
+    :param nb_to_label: (int) the number of MRI sequences you want to label
     :param csv_path: (str) path to the csv in which the labels will be stored
     :return: None
     """
 
     # Find patient Ids
     patient_ids = patient_id_extractor(cfg.ROOT)
-    last_patient_name = patient_ids[0]
-
-    # Check file, directory existence, otherwise return an error or build the directory
-
 
     # If the csv file does not exist, create it
     if not Path(csv_path).exists():
         create_csv('labels.csv', osp.join(cfg.PATH_TO_PROJECT, 'data'))
 
     # Otherwise retrieve the last line of csv to start with the right patient
-    last_patient_index = patient_ids[0]
-
     last_patient_index, last_patient_name, _ = get_csv_last_line(csv_path)
-    # last_patient_index = patient_ids.index(str(last_patient_index))
 
+    if nb_to_label is None or nb_to_label > (len(patient_ids) - last_patient_index):
+        nb_to_label = len(patient_ids) - last_patient_index
 
     # Process to the labelling
     print('LABELLING TI SCOUT MRIs SEQUENCES ...')
-    list_optimal_ti_scouts = optimal_ti_selection(cfg.ROOT, patient_ids[last_patient_index + 1: last_patient_index+5])
-
-    nb_annoted_sequences = len(list_optimal_ti_scouts)
+    list_optimal_ti_scouts = optimal_ti_selection(cfg.ROOT,
+                                                  patient_ids[last_patient_index + 1: last_patient_index + nb_to_label])
 
     # Save the annotations in csv
     fill_csv(csv_path, list_optimal_ti_scouts)
@@ -107,12 +109,14 @@ def label_and_save_optimal_tis(csv_path):
 
     return list_optimal_ti_scouts
 
+def main_ti_generator():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--nb_sequences', '-n', type=int, default=None)
+    args = parser.parse_args()
+    patient_ids = patient_id_extractor(cfg.ROOT)
+    label_and_save_optimal_tis(cfg.LABELS_CSV_PATH, nb_to_label=args.nb_sequences)
 
 
 if __name__ == '__main__':
-    patient_ids = patient_id_extractor(cfg.ROOT)
-    label_and_save_optimal_tis(cfg.LABELS_CSV_PATH)
+    main_ti_generator()
     print('GREAT, everything is Fine !')
-
-
-

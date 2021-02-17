@@ -167,6 +167,10 @@ class MRISequenceImages(QGridLayout):
         return slider
 
     def _build_image(self):
+        """
+
+        :return: Initializes the image
+        """
         label = QLabel()
         label.setPixmap(self.mri_seq[0])
         label.setAlignment(Qt.AlignLeft)
@@ -193,6 +197,11 @@ class MRISequenceImages(QGridLayout):
         self._refresh_image_information(self.displayed_image_index)
 
     def _refresh_image(self, contrast_value):
+        """
+
+        :param contrast_value: (int) value of the contrast depending on the slidebar
+        :return: Refreshes the image if the contrast was changed or if we changed the imqge in the sequence
+        """
         self.mri_seq[self.displayed_image_index - 1] = cv2.imread(self.images_paths[self.displayed_image_index - 1])
         self.mri_seq[self.displayed_image_index - 1] = cv2.cvtColor(self.mri_seq[self.displayed_image_index - 1],
                                                                     cv2.COLOR_BGR2GRAY)
@@ -218,6 +227,11 @@ class MRISequenceImages(QGridLayout):
         self.displayed_image_information.setAlignment(Qt.AlignLeft)
 
     def brightness_value(self, contrast_value):
+        """
+
+        :param contrast_value: (int)
+        :return:
+        """
         self.brightness_value_now = contrast_value
         self._refresh_image(contrast_value)
 
@@ -272,9 +286,7 @@ class TIScoutInformation(QGridLayout):
         self.exp_text_3 = QLabel()
         self.exp_text_3.setAlignment(Qt.AlignRight)
 
-        # self.ti_scout_infos.append(str(self.edit_ti_index.text()))
-        # print("Written text", str(self.edit_ti_index.text()))
-
+        # add the informations to the window (in order to display them)
         self.addWidget(self.patient_name_label, 2 * 0, 1)
         self.addWidget(self.exp_text_1, 2 * 4, 1)
         self.addWidget(self.edit_ti_index, 2 * 5, 1)
@@ -282,7 +294,6 @@ class TIScoutInformation(QGridLayout):
         self.addWidget(self.exp_text_3, 2 * 7, 1)
 
         self.stop = self.edit_ti_index.stop
-        print("stop values", self.edit_ti_index.stop, self.stop)
 
     def erase(self):
         self.stop = self.edit_ti_index.stop
@@ -290,6 +301,11 @@ class TIScoutInformation(QGridLayout):
 
 
 def labelling_app(patient_id):
+    """
+
+    :param patient_id: (string) name of the patient (number of the folder converted to string)
+    :return: Display a GUI to label one MRI sequence
+    """
     # load image sequences
     mri_im, mri_seq, patient_id = load_patient_mri_images(cfg.ROOT, patient_id)
     ti_info = []
