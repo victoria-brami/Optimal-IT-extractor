@@ -10,7 +10,7 @@ Gadolinium to get this better visualization
 The black Blood MRI images they generate contain a sequence of MRI generated at different
 instants. Image contrast vary with time as it impregnates gradually the muscle tissues.
 
-''' Insert Graphic image with optimal time inversion '''
+'![TI_Scout_image](images/optimal_ti_scout.png)
 
 The contrast is the best on MRIs images when blood signal is null.
 However, the selection of the optimal inversion time TI (instant 
