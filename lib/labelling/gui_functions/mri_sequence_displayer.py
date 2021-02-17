@@ -1,8 +1,7 @@
 import cv2
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QPixmap, QImage, QFont
-from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QSlider, QGridLayout, QHBoxLayout, QLineEdit, \
-    QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QSlider, QGridLayout, QHBoxLayout, QLineEdit
 
 from lib.labelling.gui_functions.main_widget import MainWidget
 from lib.utils.image_visu import load_patient_mri_images

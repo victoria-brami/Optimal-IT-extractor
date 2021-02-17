@@ -111,6 +111,7 @@ def label_and_save_optimal_tis(csv_path, nb_to_label=None):
 
     return list_optimal_ti_scouts
 
+
 def main_ti_generator():
     """
 
