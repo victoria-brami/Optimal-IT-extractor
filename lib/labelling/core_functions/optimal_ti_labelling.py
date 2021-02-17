@@ -52,12 +52,14 @@ def optimal_ti_selection(root_dir, patient_ids):
 
             sequence_label_vector[0] = int(patient_id)
 
-            # in case the user wrote down an invalid parameter: the application closes
+            # In case the user wrote down an invalid parameter: the application closes
             possible_indexes = [str(j) for j in range(cfg.NB_IMAGES_PER_MRI_SEQUENCE)]
 
             for idx in optimal_indexes:
+                # In case the user wrote down an invalid parameter: the application closes
                 if idx not in possible_indexes:
                     stop_labelling = True
+                # otherwise we edit the labels correctly
                 else:
                     sequence_label_vector[int(idx)] = 1
 
@@ -110,10 +112,13 @@ def label_and_save_optimal_tis(csv_path, nb_to_label=None):
     return list_optimal_ti_scouts
 
 def main_ti_generator():
+    """
+
+    :return: main function for labelling
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--nb_sequences', '-n', type=int, default=None)
     args = parser.parse_args()
-    patient_ids = patient_id_extractor(cfg.ROOT)
     label_and_save_optimal_tis(cfg.LABELS_CSV_PATH, nb_to_label=args.nb_sequences)
 
 
