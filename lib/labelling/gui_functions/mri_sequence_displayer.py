@@ -149,6 +149,12 @@ class MRISequenceImages(QGridLayout):
         # Build informative bar (telling displayed image index)
 
     def _build_button(self, button_name, callback):
+        """
+
+        :param button_name: (string) name of the button (what will be wriiten on it)
+        :param callback: function that updates the window if the button is clicked
+        :return: Displays the button in the window
+        """
 
         # Button appearance
         button = QPushButton(button_name)
@@ -161,6 +167,10 @@ class MRISequenceImages(QGridLayout):
         return button
 
     def _build_vertical_contrast_slider(self):
+        """
+
+        :return: Builds the vertical slider on the window to adapt image contrast
+        """
         slider = QSlider()
         slider.setOrientation(Qt.Vertical)
         slider.valueChanged['int'].connect(self.brightness_value)  # in order to adapt the contrast
@@ -180,6 +190,10 @@ class MRISequenceImages(QGridLayout):
         return label
 
     def _build_image_information(self):
+        """
+
+        :return: Initializes image index in the window
+        """
         label = QLabel(" Image {} / {}".format(self.displayed_image_index, self.nb_images))
         self.displayed_image_information = label
         self.displayed_image_information.setFont(QFont('Arial', 30))
@@ -187,8 +201,10 @@ class MRISequenceImages(QGridLayout):
         return label
 
     def _click_for_image_change(self):
+        """
 
-        """ Update the index of displayed image """
+        :return: Update the index of displayed image
+        """
         if self.sender().key == LEFT_REPR and self.displayed_image_index > 1:
             self.displayed_image_index -= 1
         if self.sender().key == RIGHT_REPR and self.displayed_image_index < self.nb_images:
@@ -221,7 +237,11 @@ class MRISequenceImages(QGridLayout):
         self.displayed_image.setPixmap(self.mri_seq[self.displayed_image_index - 1])
 
     def _refresh_image_information(self, index):
-        # self.displayed_image_information = QLabel()
+        """
+
+        :param index: new image index
+        :return: Refreshes the image index if left or right button was pressed (to be displayed on the window)
+        """
         self.displayed_image_information.setText(" Image {} / {}".format(index, self.nb_images))
         self.displayed_image_information.setFont(QFont('Arial', 30))
         self.displayed_image_information.setAlignment(Qt.AlignLeft)
@@ -248,7 +268,7 @@ class TIScoutInformation(QGridLayout):
 
         :param patient_id: (str) patient name
         :param ti_scout_information: (list) in which the information will be stored
-        :param register: (bool) register the lines input in text box
+        :param can_stop: (bool) tells if we can stop labelling or not
         """
         super().__init__()
         self.patient_name = patient_id
@@ -262,6 +282,10 @@ class TIScoutInformation(QGridLayout):
         self._set_labels()
 
     def _set_labels(self):
+        """
+
+        :return: Displays all the information needed: patient id, explanations for how to fill the Edit box
+        """
         # Patient ID
         self.patient_name_label = QLabel()
         self.patient_name_label.setText("Patient {}".format(self.patient_name))
@@ -296,6 +320,10 @@ class TIScoutInformation(QGridLayout):
         self.stop = self.edit_ti_index.stop
 
     def erase(self):
+        """
+
+        :return: Erases the text xhen the window is updated
+        """
         self.stop = self.edit_ti_index.stop
         self.update()
 
